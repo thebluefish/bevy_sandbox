@@ -8,7 +8,8 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_resource(GameState::Stage1(SubState::Done))
+            .add_resource(Loader::default())
+            .add_resource(GameState::Stage0)
             .add_resource(GameTick::default())
             .add_stage_before("pre_update", "game_update")
             .add_system_to_stage("game_update", Box::new(GameStateManager::new()))
@@ -39,9 +40,10 @@ pub struct GameStateManager {
     pub id: SystemId,
     pub archetype_access: ArchetypeAccess,
     pub acc: f64, // accumulator for fixed game ticks
-    pub stage_1: StateSchedule, // Loads the loading screen
-    pub stage_2: StateSchedule, // Shows the loading screen
-    pub stage_3: StateSchedule, // Loads the rest of our assets
+    pub stage_0: StateSchedule, // Starts loading the loading screen
+    pub stage_1: StateSchedule, // Waits for load to finish
+    pub stage_2: StateSchedule, // Shows the loading screen, starts loading rest of our assets
+    pub stage_3: StateSchedule, // Waits for load to finish
     pub game_start: StateSchedule, // Hides the loading screen, preps game state
     pub game: StateSchedule, // Runs game simulation at a fixed rate
 }
@@ -53,6 +55,7 @@ impl GameStateManager {
             id: SystemId::new(),
             archetype_access: Default::default(),
             acc: 0.0,
+            stage_0: Default::default(),
             stage_1: Default::default(),
             stage_2: Default::default(),
             stage_3: Default::default(),
@@ -81,9 +84,10 @@ impl System for GameStateManager {
         let state = *resources.get::<GameState>().unwrap(); // copy the state to avoid borrow issues
 
         match state {
-            GameState::Stage1(_) => self.stage_1.run(&mut world, &mut resources),
+            GameState::Stage0 => self.stage_0.run(&mut world, &mut resources),
+            GameState::Stage1 => self.stage_1.run(&mut world, &mut resources),
             GameState::Stage2 => self.stage_2.run(&mut world, &mut resources),
-            GameState::Stage3(_) => self.stage_3.run(&mut world, &mut resources),
+            GameState::Stage3 => self.stage_3.run(&mut world, &mut resources),
             GameState::GameStart => self.game_start.run(&mut world, &mut resources),
             GameState::Game => {
                 let rate = match (resources.get::<Time>(), resources.get::<GameTick>()) {
@@ -110,6 +114,7 @@ impl System for GameStateManager {
     }
 
     fn initialize(&mut self, _world: &mut World, _resources: &mut Resources) {
+        states::stage_0::initialize(&mut self.stage_0.0);
         states::stage_1::initialize(&mut self.stage_1.0);
         states::stage_2::initialize(&mut self.stage_2.0);
         states::stage_3::initialize(&mut self.stage_3.0);

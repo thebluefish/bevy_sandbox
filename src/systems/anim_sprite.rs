@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::components::AnimSprite;
 
-pub fn animate_sprite_system(
+pub fn animate_sprite(
     texture_atlases: Res<Assets<TextureAtlas>>,
     time: Res<Time>,
     mut query: Query<(&mut AnimSprite, &mut TextureAtlasSprite, &Handle<TextureAtlas>)>,

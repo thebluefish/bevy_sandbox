@@ -8,7 +8,7 @@ pub fn setup(
     mut atlases: ResMut<Assets<TextureAtlas>>,
     textures: ResMut<Assets<Texture>>,
 ) {
-    let icon_handle = assets::GameAssets::loading(&asset_server).unwrap();
+    let icon_handle = asset_server.load(assets::LOADING).unwrap();
     let icon_tex = textures.get(&icon_handle).unwrap();
     let atlas = load_spritesheet(icon_handle, icon_tex.size, Vec2::new(16.0, 16.0), Vec2::new(0.0, 0.0));
     let atlas_handle = atlases.add(atlas);

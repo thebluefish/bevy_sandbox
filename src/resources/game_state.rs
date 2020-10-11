@@ -1,14 +1,9 @@
 #[derive(Debug, Copy, Clone)]
-pub enum SubState {
-    Waiting,
-    Done,
-}
-
-#[derive(Debug, Copy, Clone)]
 pub enum GameState {
-    Stage1(SubState),
+    Stage0,
+    Stage1,
     Stage2,
-    Stage3(SubState),
+    Stage3,
     GameStart,
     Game,
 }

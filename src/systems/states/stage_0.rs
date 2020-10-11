@@ -1,4 +1,4 @@
-use crate::{resources::{Loader, GameState}};
+use crate::{assets, resources::{GameState, Loader}};
 use bevy::{prelude::*, ecs::Schedule};
 
 pub fn initialize(schedule: &mut Schedule) {
@@ -11,8 +11,6 @@ fn run(
     mut state: ResMut<GameState>,
     mut loader: ResMut<Loader>,
 ) {
-    if loader.check(&asset_server) {
-        println!("Preload done...");
-        *state = GameState::Stage2;
-    }
+    loader.load::<Texture, _>(&asset_server, &[assets::LOADING]).unwrap();
+    *state = GameState::Stage1;
 }
